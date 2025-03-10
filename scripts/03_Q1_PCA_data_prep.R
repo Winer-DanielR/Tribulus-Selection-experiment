@@ -182,4 +182,3 @@ pca_means_pop <- left_join(pca_mean, pca_means_pop, by = c("island", "population
 
 # Export the tables 
 #write_csv(pca_mean, "PCA_population_selection.csv")
-
