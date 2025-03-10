@@ -11,7 +11,7 @@
 # Here I am taking the mean values.
 
 # Import dataset
-pca <- read_csv("~/Vault of Ideas/20 - 29 Tribulus Research/24 Chapter. Tribulus natural selection experiment/24.03 R code/Tribulus Selection experiment/Data/Processed/PCA/PCA_scores.csv")
+pca <- read_csv("~/Thesis reasearch/20 - 29 Tribulus Research/24 Chapter. Tribulus natural selection experiment/24.03 R code/Tribulus Selection experiment/Data/Processed/PCA/PCA_scores.csv")
 
 # Convert factors
 pca <- pca %>% mutate_at(vars(year, island, 
@@ -52,13 +52,20 @@ pca_means_island <- pca_eaten_ind %>%
                       n = length,
   ), c(4:9))
 
+pca_eaten_ind <- group_by(pca_eaten_ind, island)
+
+pca_means_all <- pca_eaten_ind %>%  
+  summarise_each(funs(mean = mean,
+                      var = var,
+                      se = sd(.)/sqrt(n()),
+                      n = length,  ), c(5:10))
 
 # Pivot table
 ## To compare eaten and uneaten mericarps
 pca_means_island <- pivot_wider(pca_means_island, names_from = eaten,
                                 values_from = c(3:26))
 
-### S estimates ####
+### Mean differences Uneaten - Eaten mericarps ####
 pca_means_island$S_PC1 <- (pca_means_island$PC1_mean_0 - 
                              pca_means_island$PC1_mean_1)
 
@@ -79,11 +86,31 @@ pca_means_island$S_Position <- (pca_means_island$Position_mean_0 -
 
 # I can estimate the difference of uneaten and eaten mericarps (selection) in this dataset.
 
+### Selection Estimates Mean differences between eaten and all mericarps ####
+
+pca_means_all$S_PC1 <- (pca_means_island$PC1_mean_1 - 
+                             pca_means_all$PC1_mean)
+
+pca_means_all$S_PC2 <- (pca_means_island$PC2_mean_1 - 
+                          pca_means_all$PC2_mean)
+
+pca_means_all$S_PC3 <- (pca_means_island$PC3_mean_1 - 
+                          pca_means_all$PC3_mean)
+
+pca_means_all$S_Size <- (pca_means_island$Size_mean_1 - 
+                           pca_means_all$Size_mean)
+
+pca_means_all$S_Defense <- (pca_means_island$Defense_mean_1 - 
+                              pca_means_all$Defense_mean)
+
+pca_means_all$S_Position <- (pca_means_island$Position_mean_1 - 
+                               pca_means_all$Position_mean)
+
 # Join the two mean datasets
 pca_means_island <- left_join(pca_means, pca_means_island, by = "island")
 
 # Export this dataset for plots
-#write_csv(pca_means_island, "PCA_islands.csv")
+#write_csv(pca_means_all, "PCA_islands_selection.csv")
 
 ## Group by population ####
 # All mericarp means by population
@@ -110,7 +137,7 @@ pca_means_pop <- pivot_wider(pca_means_pop, names_from = eaten,
 # Replace NAs as 0 frequencies
 pca_means_pop[is.na(pca_means_pop)] = 0
 
-### S estimates ####
+### Mean trait differences uneaten - eaten ####
 pca_means_pop$S_PC1 <- (pca_means_pop$PC1_mean_0 - 
                           pca_means_pop$PC1_mean_1)
 
@@ -129,9 +156,30 @@ pca_means_pop$S_Defense <- (pca_means_pop$Defense_mean_0 -
 pca_means_pop$S_Position <- (pca_means_pop$Position_mean_0 - 
                                pca_means_pop$Position_mean_1)
 
+### Mean selection estimates eaten - all mericarps ####
+pca_mean$S_PC1 <- (pca_means_pop$PC1_mean_1 - 
+                          pca_mean$PC1_mean)
+
+pca_mean$S_PC2 <- (pca_means_pop$PC2_mean_1 - 
+                     pca_mean$PC2_mean)
+
+pca_mean$S_PC3 <- (pca_means_pop$PC3_mean_1 - 
+                     pca_mean$PC3_mean)
+
+pca_mean$S_Size <- (pca_means_pop$Size_mean_1 - 
+                      pca_mean$Size_mean)
+
+pca_mean$S_Defense <- (pca_means_pop$Defense_mean_1 - 
+                         pca_mean$Defense_mean)
+
+pca_mean$S_Position <- (pca_means_pop$Position_mean_1 - 
+                          pca_mean$Position_mean)
+
+
+
 # Join the datasets
 pca_means_pop <- left_join(pca_mean, pca_means_pop, by = c("island", "population"))
 
 # Export the tables 
-#write_csv(pca_means_pop, "PCA_population_NAs.csv")
+#write_csv(pca_mean, "PCA_population_selection.csv")
 
